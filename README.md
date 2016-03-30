@@ -14,7 +14,7 @@ Vamos con los pasos a seguir:
 
 Lanzar la maquina virtual para obtener las direcciones necesarias para diferentes tipos de conexion.
 
-![**](/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/primera.png)
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/primera.png)
 
 Ahora vamos a abrir con PUTTY dos consolas; no son necesarias dos pero a la hora de trabajar es mucho mas sencillo y util, usaremos una para lanzar odoo y otra para navegar por la estructura de carpetas. De no hacerlo asi tendriamos que constantemente ir cerrando odoo y volver a lanzarlo.
 

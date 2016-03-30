@@ -230,9 +230,7 @@
 
         <menuitem id="session_menu" name="Sessions"
                   parent="openacademy_menu"
-                  action="session_list_action"/>
-
-             
+                  action="session_list_action"/>     
 
     </data>
 </openerp>

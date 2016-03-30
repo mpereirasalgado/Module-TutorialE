@@ -1112,5 +1112,7 @@ Ahora van alguna capturas de pantalla de estos ultimos puntos, los cuales tambie
 ## FAQs
 
 Micael Pereira Salgado
+
 mpereirasalgado@danielcastelao.org
+
 micaelcaballero@gmail.com

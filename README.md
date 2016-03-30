@@ -786,6 +786,8 @@ añadiremos un field al tree antes de la barra de progreso.
 
 ```
 
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/.png)
+
 CALENDARS:
 
 es un poco mas complicado de implemetar, al igaul que tenemos un boton para abrir el detalle de una session, tendremos ahora uno para abrir el calendario.
@@ -805,73 +807,276 @@ end_date = fields.Date(string="End Date", store=True,
 
 ```
 
-
-
-
-
-
-
+y esto en la misma clase antes de @api.constraints:
 
 ```java
+@api.depends('start_date', 'duration')
+    def _get_end_date(self):
+        for r in self:
+            if not (r.start_date and r.duration):
+                r.end_date = r.start_date
+                continue
+
+            # Add duration to start_date, but: Monday + 5 days = Saturday, so
+            # subtract one second to get on Friday instead
+            start = fields.Datetime.from_string(r.start_date)
+            duration = timedelta(days=r.duration, seconds=-1)
+            r.end_date = start + duration
+
+    def _set_end_date(self):
+        for r in self:
+            if not (r.start_date and r.end_date):
+                continue
+
+            # Compute the difference between dates, but: Friday - Monday = 4 days,
+            # so add one day to get 5 days instead
+            start_date = fields.Datetime.from_string(r.start_date)
+            end_date = fields.Datetime.from_string(r.end_date)
+            r.duration = (end_date - start_date).days + 1
 
 ```
 
+en oepenacademy.xml añadimos es record antes del session_list_action:
 
 ```java
+<!-- calendar view -->
+        <record model="ir.ui.view" id="session_calendar_view">
+            <field name="name">session.calendar</field>
+            <field name="model">openacademy.session</field>
+            <field name="arch" type="xml">
+                <calendar string="Session Calendar" date_start="start_date"
+                          date_stop="end_date"
+                          color="instructor_id">
+                    <field name="name"/>
+                </calendar>
+            </field>
+        </record>
 
 ```
 
-
+y en el session_list_action modificamos es este field:
 
 ```java
+<field name="view_mode">tree,form,calendar</field>
 
 ```
 
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/.png)
+
+SEACH VIEWS
+
+unicamente tabajamos en openacademy.xml, dentro de course_search_view añadimos dentre de search:
 
 ```java
+<filter name="my_courses" string="My Courses"
+                            domain="[('responsible_id', '=', uid)]"/>
+                    <group string="Group By">
+                        <filter name="by_responsible" string="Responsible"
+                                context="{'group_by': 'responsible_id'}"/>
+                    </group>
 
 ```
 
+en el course_list_action un field mas antes del ultimo:
 
 ```java
+<field name="context" eval="{'search_default_my_courses': 1}"/>
 
 ```
 
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/.png)
+
+GANTT:
+
+en models.py añadimos dentro de la clase session y despues de end_date:
 
 
 ```java
+hours = fields.Float(string="Duration in hours",
+                         compute='_get_hours', inverse='_set_hours')
 
 ```
 
+en la misma clase antes de @api.constrains:
 
 ```java
+@api.depends('duration')
+    def _get_hours(self):
+        for r in self:
+            r.hours = r.duration * 24
+
+    def _set_hours(self):
+        for r in self:
+            r.duration = r.hours / 24
 
 ```
 
-
+en openacademy.xml añadimos un record antes del session_list_action:
 
 ```java
+<record model="ir.ui.view" id="session_gantt_view">
+            <field name="name">session.gantt</field>
+            <field name="model">openacademy.session</field>
+            <field name="arch" type="xml">
+                <gantt string="Session Gantt" color="course_id"
+                       date_start="start_date" date_delay="hours"
+                       default_group_by='instructor_id'>
+                    <field name="name"/>
+                </gantt>
+            </field>
+        </record>
 
 ```
 
+y modificamos el ultimo field del mismo list_action:
 
 ```java
+<field name="view_mode">tree,form,calendar,gantt</field>
 
 ```
 
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/.png)
+
+GRAPH VIEWS
+
+en models.py añadimos en lo clase session despues del hours añadido en pasos anteriores:
 
 ```java
+attendees_count = fields.Integer(
+        string="Attendees count", compute='_get_attendees_count', store=True)
 
 ```
 
-
+tambien antes de @api.constrains lo siguiente:
 
 ```java
+@api.depends('attendee_ids')
+    def _get_attendees_count(self):
+        for r in self:
+            r.attendees_count = len(r.attendee_ids)
 
 ```
 
-
+en openacademy.py añadimos  un record mas antes de session_list_action:
 
 ```java
+<record model="ir.ui.view" id="openacademy_session_graph_view">
+            <field name="name">openacademy.session.graph</field>
+            <field name="model">openacademy.session</field>
+            <field name="arch" type="xml">
+                <graph string="Participations by Courses">
+                    <field name="course_id"/>
+                    <field name="attendees_count" type="measure"/>
+                </graph>
+            </field>
+        </record>
 
 ```
+
+modificamo el ultimo field del mismo list_action:
+
+```java
+ <field name="view_mode">tree,form,calendar,gantt,graph</field>
+
+```
+
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/.png)
+
+KANBAN:
+
+en models.py añadimos una linea debajo  de active en la clase session:
+
+```java
+color = fields.Integer()
+
+
+```
+
+en open academy.xml añadimos el record correspondiente:
+
+```java
+<record model="ir.ui.view" id="view_openacad_session_kanban">
+            <field name="name">openacad.session.kanban</field>
+            <field name="model">openacademy.session</field>
+            <field name="arch" type="xml">
+                <kanban default_group_by="course_id">
+                    <field name="color"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div
+                                    t-attf-class="oe_kanban_color_{{kanban_getcolor(record.color.raw_value)}}
+                                                  oe_kanban_global_click_edit oe_semantic_html_override
+                                                  oe_kanban_card {{record.group_fancy==1 ? 'oe_kanban_card_fancy' : ''}}">
+                                <div class="oe_dropdown_kanban">
+                                    <!-- dropdown menu -->
+                                    <div class="oe_dropdown_toggle">
+                                        <i class="fa fa-bars fa-lg"/>
+                                        <ul class="oe_dropdown_menu">
+                                            <li>
+                                                <a type="delete">Delete</a>
+                                            </li>
+                                            <li>
+                                                <ul class="oe_kanban_colorpicker"
+                                                    data-field="color"/>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="oe_clear"></div>
+                                </div>
+                                <div t-attf-class="oe_kanban_content">
+                                    <!-- title -->
+                                    Session name:
+                                    <field name="name"/>
+                                    <br/>
+                                    Start date:
+                                    <field name="start_date"/>
+                                    <br/>
+                                    duration:
+                                    <field name="duration"/>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+```
+
+y modificamos el list_action como anteriormente:
+
+```java
+<field name="view_mode">tree,form,calendar,gantt,graph,kanban</field>
+
+```
+
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/.png)
+
+Con todo esto ya tenemos un tutorial completito, pero se peden hacer mas cosas aun:
+
+* Workflows: esto no facilita el seguimiento de la creacion de sessiones, nos va indicando si queremos confirmar lo que escribimos y estamos de acuerdo con lo escrito o si queremos volver atrás y modificar los campos antes de guardar la session creada.
+* Security: he creado un usuario que pertenece a un grupo de usuarios que solo podran podran ver, no modificar, las sessiones; empleando otro metodo un grupo openacademy/manager en el cual sus usuarios tendran todos los permisos posible y tambien hago que los cusros y las sessiones sean visibles a todos los ususario. Aparte de esto he creado una condicion que hace que solo el responsable de un curso pueda modificar dicho curso, en caso de no haber responsable todos los usuarios pueden modificarlo.
+* Wizards: entiendo que es una ventana popup con la que puedes interactuar pero e intentado hacerla funcionar varias veces pero el servidor se vuelve loco solo me a pasado en este punto del tutorial, la parte que da error es la parte visual en el xml. Al final lo he tenido que eliminar del xml.
+* Internacionalization: sirve para poder implementar varios idiomas, creo que al exportar el idioma elegido de odoo hace una traduccion de todos los texto, esto lo añades al proyecto de Neatbeans y creo que alli puedes modificar la traduccion por si alguna palabra no esta bien traducida o no esta traducida directamente.
+* Reporting: aqui hacemos dos cosas, la posibilidad de crear un informe e imprimirlo y por otro lado una tabla en el propio odoo con los datos relevantes de los cursos y sessiones: un grafico, un calendario la lista de los cursos.
+* WebServices: aqui se trata de crear dos aplicaciones en pyton una que solicita acceso a los xml de odoo y crear a partir de ello una interfaz supongo lo haré si tengo tiempo y otra en pyton tambien que hace uso de librerias de urllib2 y json, interactuando con un servidor odoo tambien lo haré en cuanto pueda.
+
+
+Ahora van alguna capturas de pantalla de estos ultimos puntos, los cuales tambien estan agrupados en un commit:
+
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/.png)
+
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/.png)
+
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/.png)
+
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/.png)
+
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/.png)
+
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/.png)
+
+
+Micael Pereira Salgado
+mpereirasalgado@danielcastelao.org
+micaelcaballero@gmail.com

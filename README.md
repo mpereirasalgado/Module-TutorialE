@@ -394,7 +394,7 @@ Añadimos un record a openacademy.xml:
                   action="session_list_action"/>
 ```
 
-Vamos a crear relaciones many2oen , one2many, y many2many entre los cusrsos(courses), las sesiones(sessions) y los asistentes a las sesiones(attendees). Esto hara posible ver las sessiones en cada curso o a que curso pertenece una sesion o los asistentes a una sesion de un curso.
+Vamos a crear relaciones many2one , one2many, y many2many entre los cusrsos(courses), las sesiones(sessions) y los asistentes a las sesiones(attendees). Esto hara posible ver las sessiones en cada curso o a que curso pertenece una sesion o los asistentes a una sesion de un curso.
 
 Many2one:
 
@@ -934,8 +934,6 @@ y modificamos el ultimo field del mismo list_action:
 <field name="view_mode">tree,form,calendar,gantt</field>
 
 ```
-
-![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/.png)
 
 GRAPH VIEWS
 

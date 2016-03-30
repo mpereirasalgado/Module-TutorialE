@@ -394,3 +394,484 @@ Añadimos un record a openacademy.xml:
                   action="session_list_action"/>
 ```
 
+Vamos a crear relaciones many2oen , one2many, y many2many entre los cusrsos(courses), las sesiones(sessions) y los asistentes a las sesiones(attendees). Esto hara posible ver las sessiones en cada curso o a que curso pertenece una sesion o los asistentes a una sesion de un curso.
+
+Many2one:
+
+añadimos en models.py a la clase course:
+
+```java
+responsible_id = fields.Many2one('res.users',
+        ondelete='set null', string="Responsible", index=True)
+
+```
+
+añadimos en models.py a la clase session:
+
+```java
+instructor_id = fields.Many2one('res.partner', string="Instructor")
+    course_id = fields.Many2one('openacademy.course',
+        ondelete='cascade', string="Course", required=True)
+
+```
+
+añadimos en el openacademy.xml:
+
+esto va dentro del group del course_form_view:
+```java
+<field name="responsible_id"/>
+```
+
+es un record dentro de openacademy.xml, sobreescribe la lista visible de cursos convirtiendola en una tabla con u elemento mas el responsable del curso:
+```java
+<!-- override the automatically generated list view for courses -->
+        <record model="ir.ui.view" id="course_tree_view">
+            <field name="name">course.tree</field>
+            <field name="model">openacademy.course</field>
+            <field name="arch" type="xml">
+                <tree string="Course Tree">
+                    <field name="name"/>
+                    <field name="responsible_id"/>
+                </tree>
+            </field>
+        </record>
+
+```
+
+estos dos grupos se añaden al session_form_view, esto nos permitirá al crear ñas sesion indicar a que curso pertenece ponerle un nombre y un instructor; por otro lado nos permite ponerle una fecha una duracion y un numero de asientos disponibles en la sesion:
+
+```java
+<group string="General">
+                                <field name="course_id"/>
+                                <field name="name"/>
+                                <field name="instructor_id"/>
+                            </group>
+                            <group string="Schedule">
+                                <field name="start_date"/>
+                                <field name="duration"/>
+                                <field name="seats"/>
+                            </group>
+
+```
+
+este record se añade como los demás, nos va a generar la tabla con las sesiones creadas, nombre de sesion y curso al que pertenece:
+
+```java
+<!-- session tree/list view -->
+        <record model="ir.ui.view" id="session_tree_view">
+            <field name="name">session.tree</field>
+            <field name="model">openacademy.session</field>
+            <field name="arch" type="xml">
+                <tree string="Session Tree">
+                    <field name="name"/>
+                    <field name="course_id"/>
+                </tree>
+            </field>
+        </record>
+
+```
+
+One2many:
+
+añadimos a la clase course de models.py lo siguiente:
+
+```java
+session_ids = fields.One2many(
+        'openacademy.session', 'course_id', string="Sessions")
+```
+
+en el openacademy.xml dentro del notebook de course_form_view añadimos esta página, podemo borar una de muestra que se llama about
+
+```java
+<page string="Sessions">
+                                <field name="session_ids">
+                                    <tree string="Registered sessions">
+                                        <field name="name"/>
+                                        <field name="instructor_id"/>
+                                    </tree>
+                                </field>
+
+```
+
+Many2many:
+
+en models.py añadimos a la clase session:
+
+```java
+ attendee_ids = fields.Many2many('res.partner', string="Attendees")
+
+```
+
+en openacademy.xml añadimos un label y un field a session_form_view justo debajo del group antes de cerrar sheet:
+
+```java
+<label for="attendee_ids"/>
+<field name="attendee_ids"/>
+
+```
+Ua vez hecho esto ya podremos crear cursos y sessiones y ver como se relacionan unos con otros.
+
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/.png)
+
+
+Ahora vamos a crear una lista de contactos y una de tag asociados a ellos para asi a poder añadir esos contactos a las sesiones o como responsable de un curso o instructor de una sesion. Para ello crearemos un partner.py y un partner.xml ambos en la carpeta openacademy
+
+importaremos en __init__.py partner para que se lance:
+```java
+from . import partner
+
+```
+
+y en partner.py crearemos la clase partner asi como una relacion many2many con las sesiones
+
+```java
+# -*- coding: utf-8 -*-
+from openerp import fields, models
+
+class Partner(models.Model):
+    _inherit = 'res.partner'
+
+    # Add a new column to the res.partner model, by default partners are not
+    # instructors
+    instructor = fields.Boolean("Instructor", default=False)
+
+    session_ids = fields.Many2many('openacademy.session',
+        string="Attended Sessions", readonly=True)
+
+```
+
+en el partner.xml añadimos todo eso:
+
+```java
+<?xml version="1.0" encoding="UTF-8"?>
+ <openerp>
+    <data>
+        <!-- Add instructor field to existing view -->
+        <record model="ir.ui.view" id="partner_instructor_form_view">
+            <field name="name">partner.instructor</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+                <notebook position="inside">
+                    <page string="Sessions">
+                        <group>
+                            <field name="instructor"/>
+                            <field name="session_ids"/>
+                        </group>
+                    </page>
+                </notebook>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="contact_list_action">
+            <field name="name">Contacts</field>
+            <field name="res_model">res.partner</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        <menuitem id="configuration_menu" name="Configuration"
+                  parent="main_openacademy_menu"/>
+        <menuitem id="contact_menu" name="Contacts"
+                  parent="configuration_menu"
+                  action="contact_list_action"/>
+    </data>
+</openerp>
+
+```
+
+bien ahora y ya deberiamos ser capaces una vez subido el codigo al servidor y actualizado el modulo de ver una seccion de contactos nueva con dos pestañas accesible.
+
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/.png)
+
+Ahora vamos a crear dos tags especificos y vamos a hacer que solo los contactos que tengan estos tags sean seleccionable a la hora de elegir un intructor para una sesion.
+
+en models.py y e la clase session modificamos el instructor_id:
+```java
+instructor_id = fields.Many2one('res.partner', string="Instructor",
+        domain=['|', ('instructor', '=', True),
+                     ('category_id.name', 'ilike', "Teacher")])
+
+
+```
+
+esto lo añadimos dentro de partner.xml antes de cerrar data, esto nos da una lista de tags por defecto y los dos tags que nosotros creamos.
+
+```java
+<record model="ir.actions.act_window" id="contact_cat_list_action">
+            <field name="name">Contact Tags</field>
+            <field name="res_model">res.partner.category</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        <menuitem id="contact_cat_menu" name="Contact Tags"
+                  parent="configuration_menu"
+                  action="contact_cat_list_action"/>
+
+        <record model="res.partner.category" id="teacher1">
+            <field name="name">Teacher / Level 1</field>
+        </record>
+        <record model="res.partner.category" id="teacher2">
+            <field name="name">Teacher / Level 2</field>
+        </record>
+
+```
+Ahora a la hora de añadir un instructor a una session solo podremos añadir los contactos con estos dos tags específicos.
+
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/.png)
+
+Vamos a añadir tanto a la hora de crear una session como una vez creada una barra que nos indique el aforo de la sesion.
+
+en models.py añadimos lo siguiente a la clase session:
+
+```java
+taken_seats = fields.Float(string="Taken seats", compute='_taken_seats')
+
+    @api.depends('seats', 'attendee_ids')
+    def _taken_seats(self):
+        for r in self:
+            if not r.seats:
+                r.taken_seats = 0.0
+            else:
+                r.taken_seats = 100.0 * len(r.attendee_ids) / r.seats
+
+```
+
+y en openacademy.xml en session_form_view lo siguiente en group "shedule" al final antes de cerrarlo:
+
+```java
+<field name="taken_seats" widget="progressbar"/>
+
+```
+en session_tree_view en el tree antes de cerrarlo esto:
+
+```java
+<field name="taken_seats" widget="progressbar"/>
+
+```
+
+Vamos a hacer que por defecto al crear una session nos ponga la fecha actual con la opcion de cambiarlo si queremos.
+
+en models.py dentro de la clase session cambiamos el star_date:
+
+```java
+start_date = fields.Date(default=fields.Date.today)
+
+```
+
+y añadimos al final de la clase session, asi la sesion esta activa por defecto:
+
+
+```java
+active = fields.Boolean(default=True)
+
+```
+
+en el openacademy.xml en el group "general" de session_form_view añadimos esto antes de cerralo:
+
+```java
+<field name="active"/>
+
+```
+Ya tenemos la sesion activa por defecto al crearla y la fecha actual seleccionada:
+
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/.png)
+
+Vamos a crear unas ventanas de aviso emergentes parecidas a las toast de android que saltaran si determinadas variable no son correcta, por ejemplo si hay mas asistentes que asisentos en la session o si introducimos un numero negativo de asientos.
+
+unicamente añadimos en models.py fuera de las clases lo siguiente:
+
+```java
+@api.onchange('seats', 'attendee_ids')
+    def _verify_valid_seats(self):
+        if self.seats < 0:
+            return {
+                'warning': {
+                    'title': "Incorrect 'seats' value",
+                    'message': "The number of available seats may not be negative",
+                },
+            }
+        if self.seats < len(self.attendee_ids):
+            return {
+                'warning': {
+                    'title': "Too many attendees",
+                    'message': "Increase seats or remove excess attendees",
+                },
+            }
+
+```
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/.png)
+
+Ahora usaremos otra forma de controlar los datos que vamos introduciendo, por ejemplo que no sea posible que un instructor asista a su propia sesion o que dos cursos se llamen igual. Estos no aparecen asta que intentamos guardar la sesion o el courso mientras que en el caso anterior son instantanes all cambiar de campo de escritura.
+
+Para evitar que un instructor asista a su sesion:
+
+modificamos en modesl.py la linea de importacion: 
+
+```java
+from openerp import models, fields, api, exceptions
+
+```
+y añadimos fuera de las clases otro metodo o funcion predefinida con la que controlar esto:
+
+```java
+@api.constrains('instructor_id', 'attendee_ids')
+    def _check_instructor_not_in_attendees(self):
+        for r in self:
+            if r.instructor_id and r.instructor_id in r.attendee_ids:
+                raise exceptions.ValidationError("A session's instructor can't be an attendee")
+
+```
+
+Para comprobar si el nombre de la descripcion y el curso son diferentes, nos saltar un aviso al guardar si son iguales y tambien hacemos que el nombre sea unico.
+
+añadimos en models.py dentro de la clase course al final:
+
+```java
+sql_constraints = [
+        ('name_description_check',
+         'CHECK(name != description)',
+         "The title of the course should not be the description"),
+
+        ('name_unique',
+         'UNIQUE(name)',
+         "The course title must be unique"),
+    ]
+
+```
+
+Como hicimos que el nombre sea unico ahora al crea una copia de un curso no nos dejaran hacerlo. Vamos permitir que nos deje duplicar u curso pero cambiado el nombre a "Copy of" [nombre original], asi si podremos hacer duplicados de cursos.
+
+en models.py añadimos en la clase course antes del _sql_constraints:
+
+```java
+@api.multi
+    def copy(self, default=None):
+        default = dict(default or {})
+
+        copied_count = self.search_count(
+            [('name', '=like', u"Copy of {}%".format(self.name))])
+        if not copied_count:
+            new_name = u"Copy of {}".format(self.name)
+        else:
+            new_name = u"Copy of {} ({})".format(self.name, copied_count)
+
+        default['name'] = new_name
+        return super(Course, self).copy(default)
+
+```
+
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/.png)
+
+Ya hemos terminado con lo básico ahora vamos a ver como implementar algunas herramientas que nos faciliten el uso y visualizacion de todos los datos:
+
+* Tree views: vamos a establecer que las sessiones tengan un color diferente segun su duracion, azul<5>negro<15>rojo, en dias.
+* Calendars: un calendario en el que ver de manera organizada las sesiones.
+* Search views: añadiremos un tag a la barra de busqueda de los cursos para que busque en mis cursos por defecto, asi un usuario solo verá en principio los cursos en los que participa de alguna forma.
+* Gantt: implementaremos este tipo de diagrama.
+* Graph views: implementaremos graficos para analizar algunos datos de los cursos y sesiones.
+* Kanban: con esto agruparemos las sesiones por cada curso pudiendo minimizar maximizar o desplazar un curso par ordenarlo a nuestro gusto.
+
+
+TREE VIEWS:
+
+unicmente modificaremos el session_tree_view:
+
+```java
+<tree string="Session Tree" decoration-info="duration&lt;5" decoration-danger="duration&gt;15">
+
+```
+
+añadiremos un field al tree antes de la barra de progreso.
+
+```java
+<field name="duration" invisible="1"/>
+
+```
+
+CALENDARS:
+
+es un poco mas complicado de implemetar, al igaul que tenemos un boton para abrir el detalle de una session, tendremos ahora uno para abrir el calendario.
+
+en models.py teenmos que importar lo sigueinte:
+
+```java
+from datetime import timedelta
+
+```
+
+añadir esto en la clase session antes de @api.depends:
+
+```java
+end_date = fields.Date(string="End Date", store=True,
+        compute='_get_end_date', inverse='_set_end_date')
+
+```
+
+
+
+
+
+
+
+
+```java
+
+```
+
+
+```java
+
+```
+
+
+
+```java
+
+```
+
+
+```java
+
+```
+
+
+```java
+
+```
+
+
+
+```java
+
+```
+
+
+```java
+
+```
+
+
+
+```java
+
+```
+
+
+```java
+
+```
+
+
+```java
+
+```
+
+
+
+```java
+
+```
+
+
+
+```java
+
+```

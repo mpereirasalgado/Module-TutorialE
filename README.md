@@ -1,6 +1,22 @@
-# Module-TutorialE
+## Module-TutorialE
+
+***Tutorial para de creacion de modulos para Odoo***
 
 En este tutorial vamos a explicar como poder cear modulos para luego usarlos en la plataforma Odoo.
+
+# Tabla de contenido
+- [Pasos Previos](#pasos-previos).
+- [Implementación Básica de Odoo](#implementación-básica-de-odoo).
+- [Creación De Courses Y Sessions Y Sus Relaciónes](#creación-de-courses-y-sessions).
+- [Creación De Los Contactos Y Tags](#creación-de-los-contactos-y-tags).
+- [Modificaciones En Session](#modificaciones-en-session).
+- [Warnnings Emergentes](#warnnings-emergentes).
+- [Constrains](#constrains).
+- [Advanced Views](#advanced-views).
+- [Que Más Se Puede Hacer](#que-mas-se-puede-hacer).
+- [FAQs](#faqs).
+
+## Pasos Previos:
 
 Para empezar necesitaremos una serie de programas:
 
@@ -80,6 +96,8 @@ Tendremos algo como esto:
 ![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/octava.png)
 
 Como con los temas tendremos que hacer un upload... de la carpeta openacademy modifica para que   los cambios surtan efecto en el servidor Odoo y poder acceder al modulo mas adelante desde el navegador.
+
+## Implementación Básica de Odoo 
 
 Ahora vamos a empezar a modificarlos archivos:
 
@@ -227,6 +245,8 @@ templates.xml:
 ```
 
 Con esto tendremos el modulo básico, ahora vamos a ir añadiendole pestañas que tendran diferentes  funcionalidades:
+
+## Creación De Courses Y Sessions
 
 La primera que vamos a añadir es la de Courses, para ello modificaremos models.py añadiendo lo siguiente:
 
@@ -511,8 +531,13 @@ en openacademy.xml añadimos un label y un field a session_form_view justo debaj
 ```
 Ua vez hecho esto ya podremos crear cursos y sessiones y ver como se relacionan unos con otros.
 
-![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/.png)
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/1.png)
 
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/2.png)
+
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/3.png)
+
+## Creación De Los Contactos Y Tags
 
 Ahora vamos a crear una lista de contactos y una de tag asociados a ellos para asi a poder añadir esos contactos a las sesiones o como responsable de un curso o instructor de una sesion. Para ello crearemos un partner.py y un partner.xml ambos en la carpeta openacademy
 
@@ -578,9 +603,11 @@ en el partner.xml añadimos todo eso:
 
 ```
 
-bien ahora y ya deberiamos ser capaces una vez subido el codigo al servidor y actualizado el modulo de ver una seccion de contactos nueva con dos pestañas accesible.
+bien ahora y ya deberiamos ser capaces una vez subido el codigo al servidor y actualizado el modulo de ver una seccion de configuracíon nueva con dos pestañas accesible.
 
-![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/.png)
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/4.png)
+
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/5.png)
 
 Ahora vamos a crear dos tags especificos y vamos a hacer que solo los contactos que tengan estos tags sean seleccionable a la hora de elegir un intructor para una sesion.
 
@@ -615,7 +642,9 @@ esto lo añadimos dentro de partner.xml antes de cerrar data, esto nos da una li
 ```
 Ahora a la hora de añadir un instructor a una session solo podremos añadir los contactos con estos dos tags específicos.
 
-![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/.png)
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/6.png)
+
+## Modificaciones En Session
 
 Vamos a añadir tanto a la hora de crear una session como una vez creada una barra que nos indique el aforo de la sesion.
 
@@ -672,7 +701,9 @@ en el openacademy.xml en el group "general" de session_form_view añadimos esto 
 ```
 Ya tenemos la sesion activa por defecto al crearla y la fecha actual seleccionada:
 
-![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/.png)
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/7.png)
+
+## Warnnings Emergentes
 
 Vamos a crear unas ventanas de aviso emergentes parecidas a las toast de android que saltaran si determinadas variable no son correcta, por ejemplo si hay mas asistentes que asisentos en la session o si introducimos un numero negativo de asientos.
 
@@ -697,7 +728,9 @@ unicamente añadimos en models.py fuera de las clases lo siguiente:
             }
 
 ```
-![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/.png)
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/8.png)
+
+## Constrains
 
 Ahora usaremos otra forma de controlar los datos que vamos introduciendo, por ejemplo que no sea posible que un instructor asista a su propia sesion o que dos cursos se llamen igual. Estos no aparecen asta que intentamos guardar la sesion o el courso mientras que en el caso anterior son instantanes all cambiar de campo de escritura.
 
@@ -758,7 +791,9 @@ en models.py añadimos en la clase course antes del _sql_constraints:
 
 ```
 
-![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/.png)
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/9.png)
+
+## Advanced Views
 
 Ya hemos terminado con lo básico ahora vamos a ver como implementar algunas herramientas que nos faciliten el uso y visualizacion de todos los datos:
 
@@ -786,7 +821,7 @@ añadiremos un field al tree antes de la barra de progreso.
 
 ```
 
-![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/.png)
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/10.png)
 
 CALENDARS:
 
@@ -861,7 +896,7 @@ y en el session_list_action modificamos es este field:
 
 ```
 
-![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/.png)
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/11.png)
 
 SEACH VIEWS
 
@@ -884,7 +919,7 @@ en el course_list_action un field mas antes del ultimo:
 
 ```
 
-![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/.png)
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/12.png)
 
 GANTT:
 
@@ -978,7 +1013,7 @@ modificamo el ultimo field del mismo list_action:
 
 ```
 
-![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/.png)
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/13.png)
 
 KANBAN:
 
@@ -1048,7 +1083,9 @@ y modificamos el list_action como anteriormente:
 
 ```
 
-![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/.png)
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/14.png)
+
+## Que Más Se Puede Hacer
 
 Con todo esto ya tenemos un tutorial completito, pero se peden hacer mas cosas aun:
 
@@ -1062,18 +1099,17 @@ Con todo esto ya tenemos un tutorial completito, pero se peden hacer mas cosas a
 
 Ahora van alguna capturas de pantalla de estos ultimos puntos, los cuales tambien estan agrupados en un commit:
 
-![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/.png)
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/15.png)
 
-![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/.png)
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/16.png)
 
-![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/.png)
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/17.png)
 
-![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/.png)
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/18.png)
 
-![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/.png)
+![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/19.png)
 
-![**](https://github.com/mpereirasalgado/Module-TutorialE/blob/master/openacademy/images/.png)
-
+## FAQs
 
 Micael Pereira Salgado
 mpereirasalgado@danielcastelao.org

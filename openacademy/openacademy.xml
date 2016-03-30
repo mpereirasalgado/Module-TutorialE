@@ -38,7 +38,7 @@
                 <search>
                     <field name="name"/>
                     <field name="description"/>
-                     <filter name="my_courses" string="My Courses"
+                    <filter name="my_courses" string="My Courses"
                             domain="[('responsible_id', '=', uid)]"/>
                     <group string="Group By">
                         <filter name="by_responsible" string="Responsible"
@@ -101,6 +101,19 @@
             <field name="model">openacademy.session</field>
             <field name="arch" type="xml">
                 <form string="Session Form">
+                    <header>
+                        <button name="draft" type="workflow"
+                                string="Reset to draft"
+                                states="confirmed,done"/>
+                        <button name="confirm" type="workflow"
+                                string="Confirm" states="draft"
+                                class="oe_highlight"/>
+                        <button name="done" type="workflow"
+                                string="Mark as done" states="confirmed"
+                                class="oe_highlight"/>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+
                     <sheet>
                         <group>
                             <group string="General">
@@ -162,7 +175,7 @@
             </field>
         </record>
         
-         <record model="ir.ui.view" id="openacademy_session_graph_view">
+        <record model="ir.ui.view" id="openacademy_session_graph_view">
             <field name="name">openacademy.session.graph</field>
             <field name="model">openacademy.session</field>
             <field name="arch" type="xml">
@@ -182,7 +195,7 @@
                     <templates>
                         <t t-name="kanban-box">
                             <div
-                                    t-attf-class="oe_kanban_color_{{kanban_getcolor(record.color.raw_value)}}
+                                t-attf-class="oe_kanban_color_{{kanban_getcolor(record.color.raw_value)}}
                                                   oe_kanban_global_click_edit oe_semantic_html_override
                                                   oe_kanban_card {{record.group_fancy==1 ? 'oe_kanban_card_fancy' : ''}}">
                                 <div class="oe_dropdown_kanban">
@@ -231,7 +244,7 @@
         <menuitem id="session_menu" name="Sessions"
                   parent="openacademy_menu"
                   action="session_list_action"/>     
-
+        
     </data>
 </openerp>
 

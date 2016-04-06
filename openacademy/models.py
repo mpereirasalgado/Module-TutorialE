@@ -65,6 +65,9 @@ class Session(models.Model):
                      ('category_id.name', 'ilike', "Teacher")])
     course_id = fields.Many2one('openacademy.course',
         ondelete='cascade', string="Course", required=True)
+        
+    aula_id = fields.Many2one('openacademy.aula',
+        ondelete='cascade', string="Aula", required=True)
 
     attendee_ids = fields.Many2many('res.partner', string="Attendees")
 
@@ -176,11 +179,10 @@ class Session(models.Model):
 class Aula(models.Model):
     _name = 'openacademy.aula'
 
-    name = fields.Char(string="Nombre del curso", required=True)
+    name = fields.Char(string="Nombre del aula", required=True)
     description = fields.Text()
     
-    session_id = fields.Many2one('openacademy.session',
-        ondelete='cascade', string="Session", required=True)
+    
 
 
 

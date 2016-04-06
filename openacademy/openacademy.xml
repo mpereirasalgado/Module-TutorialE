@@ -118,6 +118,7 @@
                         <group>
                             <group string="General">
                                 <field name="course_id"/>
+                                <field name="aula_id"/>
                                 <field name="name"/>
                                 <field name="instructor_id"/>
                                 <field name="active"/>
@@ -144,6 +145,7 @@
                 <tree string="Session Tree" decoration-info="duration&lt;5" decoration-danger="duration&gt;15">
                     <field name="name"/>
                     <field name="course_id"/>
+                    <field name="aula_id"/>
                     <field name="duration" invisible="1"/>
                     <field name="taken_seats" widget="progressbar"/>
                 </tree>
@@ -253,7 +255,6 @@
                 <form string="Aula Form">
                     <sheet>
                         <group>
-                            <field name="session_id"/>
                             <field name="name"/>
                         </group>
                     </sheet>
@@ -262,14 +263,10 @@
         </record>
 
         <record model="ir.actions.act_window" id="aula_list_action">
-            <field name="name">Aulas.tree</field>
+            <field name="name">Aulas</field>
             <field name="res_model">openacademy.aula</field>
-            <field name="arch" type="xml">
-                <tree string="Aulas Tree">
-                    <field name="name"/>
-                    <field name="session_id"/>
-                </tree>
-            </field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
         </record>
 
         <menuitem id="aula_menu" name="Aulas"

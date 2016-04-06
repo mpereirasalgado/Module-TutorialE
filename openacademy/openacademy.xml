@@ -243,7 +243,39 @@
 
         <menuitem id="session_menu" name="Sessions"
                   parent="openacademy_menu"
-                  action="session_list_action"/>     
+                  action="session_list_action"/>
+        
+        
+        <record model="ir.ui.view" id="aula_form_view">
+            <field name="name">aula.form</field>
+            <field name="model">openacademy.aula</field>
+            <field name="arch" type="xml">
+                <form string="Aula Form">
+                    <sheet>
+                        <group>
+                            <field name="session_id"/>
+                            <field name="name"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="aula_list_action">
+            <field name="name">Aulas.tree</field>
+            <field name="res_model">openacademy.aula</field>
+            <field name="arch" type="xml">
+                <tree string="Aulas Tree">
+                    <field name="name"/>
+                    <field name="session_id"/>
+                </tree>
+            </field>
+        </record>
+
+        <menuitem id="aula_menu" name="Aulas"
+                  parent="openacademy_menu"
+                  action="aula_list_action"/>
+
         
     </data>
 </openerp>

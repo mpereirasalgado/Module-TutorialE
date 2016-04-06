@@ -5,7 +5,6 @@ from datetime import timedelta
 from openerp import models, fields, api, exceptions, _
 
 
-
 class Course(models.Model):
     _name = 'openacademy.course'
 
@@ -173,6 +172,15 @@ class Session(models.Model):
         for r in self:
             if r.instructor_id and r.instructor_id in r.attendee_ids:    
                 raise exceptions.ValidationError(_("A session's instructor can't be an attendee"))
+
+class Aula(models.Model):
+    _name = 'openacademy.aula'
+
+    name = fields.Char(string="Nombre del curso", required=True)
+    description = fields.Text()
+    
+    session_id = fields.Many2one('openacademy.session',
+        ondelete='cascade', string="Session", required=True)
 
 
 
